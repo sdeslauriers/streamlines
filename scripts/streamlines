@@ -1,0 +1,64 @@
+#!/usr/bin/env python
+
+import argparse
+
+import streamlines.cli
+
+
+DESCRIPTION = """\
+Streamline manipulation on the command line
+"""
+
+
+def parse_arguments():
+
+    parser = argparse.ArgumentParser(description=DESCRIPTION)
+    subparsers = parser.add_subparsers()
+
+    # The filter subparser.
+    filter_subparser = subparsers.add_parser(
+        'filter',
+        description='Removes streamlines from a file based on their features. '
+                    'For example, remove all streamlines with a length below '
+                    '50mm using --min-length 50.',
+        help='Filters streamlines based on their features.')
+    filter_subparser.add_argument(
+        'input', metavar='input_file', type=str, 
+        help='STR The file that contains the streamlines to filter. Can be of '
+             'any file format supported by nibabel.')
+    filter_subparser.add_argument(
+        'output', metavar='output_file', type=str,
+        help='STR The file where the filtered streamlines will be saved. Can '
+             'be of any file format supported by nibabel.')
+    filter_subparser.add_argument(
+        '--min-length', metavar='FLOAT', type=float,
+        help='The minimum length of streamlines included in the output.')
+    filter_subparser.set_defaults(func=streamlines.cli.filter)
+
+    # The merge subparser.
+    merge_subparser = subparsers.add_parser(
+        'merge',
+        description='Merges several streamline files into one. The merging '
+                    'operation does not verify if duplicate streamlines exist.',
+        help='Merges several streamline files into one.')
+    merge_subparser.add_argument(
+        'inputs', metavar='input_files', nargs='+',
+        help='STR STR ... The files to be merged. Can be of any file format '
+             'supported by nibabel.')
+    merge_subparser.add_argument(
+        'output', metavar='output_file', type=str,
+        help='STR The file where the merged streamlines will be saved. Can '
+             'be of any file format supported by nibabel.')
+    merge_subparser.set_defaults(func=streamlines.cli.merge)
+
+    return parser.parse_args()
+
+
+def main():
+
+    args = parse_arguments()
+    parameters = {key: value for key, value in vars(args).items() if key != 'func'}
+    args.func(**parameters)
+
+if __name__ == '__main__':
+  main()
