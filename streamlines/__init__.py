@@ -4,7 +4,7 @@ import collections
 import numpy as np
 import scipy.interpolate
 
-from .asarray import distance, hash, length, reorient, resample
+from .asarray import distance, hash, length, reorient, resample, smooth
 
 
 class Streamline(object):
@@ -72,6 +72,13 @@ class Streamline(object):
     def resample(self, nb_points):
         return Streamline(resample(self._points, nb_points))
 
+    def smooth(self, knot_distance=10):
+        """Smooths a streamline in place"""
+
+        self._points = smooth(self._points, knot_distance)
+
+        return self
+
 
 class Streamlines(object):
     """A sequence of dMRI streamlines"""
@@ -106,3 +113,13 @@ class Streamlines(object):
 
         if min_length is not None:
             self._items = [i for i in self._items if i.length >= min_length]
+
+        return self
+
+    def smooth(self, knot_distance=10):
+        """Smooth streamlines in place"""
+
+        for streamline in self._items:
+            streamline.smooth(knot_distance)
+
+        return self

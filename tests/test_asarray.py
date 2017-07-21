@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from streamlines.asarray import distance, length, reorient, resample
+from streamlines.asarray import distance, length, reorient, resample, smooth
 
 
 class TestAsArray(unittest.TestCase):
@@ -97,3 +97,23 @@ class TestAsArray(unittest.TestCase):
         np.testing.assert_array_almost_equal(
             resampled_streamline[1],
             [0.5, 0.0, 0.0])
+
+    def test_smooth(self):
+        """Test the smooth function"""
+
+        # Streamlines with 0 and 1 point do not change.
+        streamline = np.empty((0,3))
+        smoothed_streamline = smooth(streamline)
+        np.testing.assert_array_almost_equal(smoothed_streamline, streamline)
+
+        streamline = np.array([[0, 0, 0]])
+        smoothed_streamline = smooth(streamline)
+        np.testing.assert_array_almost_equal(smoothed_streamline, streamline)
+
+        # A straight line should remain straight.
+        x = np.linspace(0, 100, 1000)
+        yz = np.zeros((1000,))
+        streamline = np.array([x, yz, yz]).T
+
+        smoothed_streamline = smooth(streamline)
+        np.testing.assert_array_almost_equal(smoothed_streamline, streamline)
