@@ -94,3 +94,38 @@ def resample(streamline, nb_points):
     new_streamline = np.array([fx(nt), fy(nt), fz(nt)]).T
 
     return new_streamline
+
+def smooth(array, knot_distance=10):
+    """Smoothes the streamline using a b-spline"""
+
+    # If the streamline has 0 or 1 point, it cannot be interpolated.
+    nb_points = len(array)
+    if nb_points <= 1:
+        return array
+
+    # Cubic splines are preferred, but require at least 4 points.
+    degree = min(nb_points - 1, 3)
+
+    # The segment length will be used to reparametrize the streamline
+    # and also provides the length.
+    segment_length = np.sqrt(np.sum((array[1:, :] - array[:-1, :]) ** 2, 1))
+    cumulative_length = np.cumsum(segment_length)
+    streamline_length = cumulative_length[-1]
+
+    # Evenly placed knots.
+    nb_knots = min(streamline_length // knot_distance, nb_points - degree + 1)
+    nb_knots = int(max(nb_knots, 2))
+    knots = np.concatenate((
+        np.zeros((degree,)),
+        np.arange(nb_knots),
+        np.ones((degree,)) * (nb_knots - 1)))
+
+    # The streamline is parametrized to a line with a length of nb_knots
+    # points with the knots evenly spaced along this line.
+    x = np.zeros((nb_points,))
+    x[1:] = cumulative_length / streamline_length * (nb_knots - 1)
+
+    # Smooth the streamline and return the new points.
+    bspline = scipy.interpolate.make_lsq_spline(x, array, knots, degree)
+
+    return bspline(x)
