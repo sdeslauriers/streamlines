@@ -67,16 +67,16 @@ class Streamline(object):
         return distance(left._points, right._points, nb_points)
 
     def reorient(self, template):
-        return Streamline(reorient(self._points, template._points))
+        """Reorients a streamline using a template streamline"""
+        self._points = reorient(self._points, template._points)
+        return self
 
     def resample(self, nb_points):
         return Streamline(resample(self._points, nb_points))
 
     def smooth(self, knot_distance=10):
         """Smooths a streamline in place"""
-
         self._points = smooth(self._points, knot_distance)
-
         return self
 
 
@@ -115,6 +115,14 @@ class Streamlines(object):
             self._items = [i for i in self._items if i.length >= min_length]
 
         return self
+
+    def reorient(self, template=None):
+
+        if template is None:
+            template = self._items[0]
+
+        for streamline in self:
+            streamline.reorient(template)
 
     def smooth(self, knot_distance=10):
         """Smooth streamlines in place"""

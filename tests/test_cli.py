@@ -5,7 +5,7 @@ import unittest
 import numpy as np
 
 from streamlines import Streamlines
-from streamlines.cli import filter, merge
+from streamlines.cli import filter, merge, reorient
 from streamlines.io import load, save
 
 
@@ -36,6 +36,26 @@ class TestCLI(unittest.TestCase):
         # A file with no streamlines.
         streamlines = Streamlines()
         filename = os.path.join(cls.test_dir.name, 'empty.trk')
+        save(streamlines, filename)
+
+        # A file with a bundle.
+        points = np.array([
+            np.linspace(0, 100, 1000),
+            np.zeros((1000,)),
+            np.zeros((1000,))]).T
+        points_list = [points + np.random.randn(*points.shape)
+                       for _ in range(100)]
+
+        streamlines = Streamlines(points_list)
+        filename = os.path.join(cls.test_dir.name, 'bundle.trk')
+        save(streamlines, filename)
+
+        # Also save the bundle with flipped orientations.
+        flip = [np.random.rand() < 0.5 for _ in points_list]
+        flip[0] = False
+        points_list = [p[::-1] if f else p for f, p in zip(flip, points_list)]
+        streamlines = Streamlines(points_list)
+        filename = os.path.join(cls.test_dir.name, 'bundle-flipped.trk')
         save(streamlines, filename)
     
     @classmethod 
@@ -75,3 +95,30 @@ class TestCLI(unittest.TestCase):
         merge(inputs, output)
         streamlines = load(output)
         self.assertEqual(len(streamlines), 3)
+
+    def test_reorient(self):
+        """Test the reorient command of the CLI"""
+
+        # Reorienting the streamlines should do nothing (they are already)
+        # correctly oriented.
+        output = os.path.join(self.test_dir.name, 'test-reorient-1.trk')
+        reorient(
+            os.path.join(self.test_dir.name, 'bundle.trk'),
+            output)
+        streamlines = load(os.path.join(self.test_dir.name, 'bundle.trk'))
+        new_streamlines = load(output)
+        for streamline, new_streamline in zip(streamlines, new_streamlines):
+            np.testing.assert_array_almost_equal(new_streamline._points,
+                                                 streamline._points)
+
+        # Reorienting the bundle with the reversed first streamline
+        # should reverse every streamline.
+        output = os.path.join(self.test_dir.name, 'test-reorient-2.trk')
+        reorient(
+            os.path.join(self.test_dir.name, 'bundle-flipped.trk'),
+            output)
+        streamlines = load(os.path.join(self.test_dir.name, 'bundle.trk'))
+        new_streamlines = load(output)
+        for streamline, new_streamline in zip(streamlines, new_streamlines):
+            np.testing.assert_array_almost_equal(new_streamline._points,
+                                                 streamline._points)

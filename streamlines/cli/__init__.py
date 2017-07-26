@@ -16,7 +16,6 @@ def filter(input, output, **kwargs):
     # Save the streamlines to the output file.
     save(streamlines, output)
 
-
 def merge(inputs, output):
 
     # Load all the input streamlines and merge them.
@@ -26,6 +25,14 @@ def merge(inputs, output):
     # Save the streamlines to the output file.
     save(streamlines, output)
 
+def reorient(input, output, **kwargs):
+
+    # Load the input streamlines using the requested parameters.
+    streamlines = load(input)
+    streamlines.reorient(**kwargs)
+
+    # Save the streamlines to the output file.
+    save(streamlines, output)
 
 def smooth(input, output, **kwargs):
 
