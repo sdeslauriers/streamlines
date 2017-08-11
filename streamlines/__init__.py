@@ -109,6 +109,11 @@ class Streamlines(object):
     def __str__(self):
         return str(self._items)
 
+    @property
+    def lengths(self):
+        """Returns the length of all streamlines"""
+        return [s.length for s in self._items]
+
     def filter(self, min_length=None):
 
         if min_length is not None:
