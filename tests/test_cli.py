@@ -5,7 +5,7 @@ import unittest
 import numpy as np
 
 from streamlines import Streamlines
-from streamlines.cli import filter, merge, reorient
+from streamlines.cli import filter, info, merge, reorient
 from streamlines.io import load, save
 
 
@@ -75,6 +75,12 @@ class TestCLI(unittest.TestCase):
             min_length=1.1)
         streamlines = load(output)
         self.assertEqual(len(streamlines), 0)
+
+    def test_info(self):
+        """Test the info command of the CLI"""
+
+        # Show the info of the bundle.
+        info(os.path.join(self.test_dir.name, 'bundle.trk'))
 
     def test_merge(self):
         """Test the merge command of the CLI"""

@@ -2,6 +2,7 @@ from functools import reduce
 import operator
 
 import nibabel as nib
+import numpy as np
 
 from streamlines import Streamlines 
 from streamlines.io import load, save
@@ -15,6 +16,18 @@ def filter(input, output, **kwargs):
 
     # Save the streamlines to the output file.
     save(streamlines, output)
+
+def info(input):
+
+    # Load the input streamlines using the requested parameters.
+    streamlines = load(input)
+
+    # Print info about the streamlines.
+    out = ''
+    out += '\nNumber of streamlines: {}'.format(len(streamlines))
+    out += '\nMean length: {:.2f}'.format(np.mean(streamlines.lengths))
+
+    print(out)
 
 def merge(inputs, output):
 
