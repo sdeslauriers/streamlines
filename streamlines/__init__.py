@@ -40,6 +40,9 @@ class Streamline(object):
     def __eq__(self, other):
         return hash(self._points) == hash(other._points)
 
+    def __getitem__(self, key):
+        return self._points[key]
+
     def __hash__(self):
         return hash(self._points)
 
@@ -84,7 +87,7 @@ class Streamlines(object):
     """A sequence of dMRI streamlines"""
 
     def __init__(self, iterable=None, affine=np.eye(4)):
-        
+
         self.affine = affine
         self._items = []
         if iterable is not None:
@@ -96,6 +99,9 @@ class Streamlines(object):
 
     def __contains__(self, streamline):
         return streamline in self._items
+
+    def __getitem__(self, key):
+        return self._items[key]
 
     def __iter__(self):
         return iter(self._items)
