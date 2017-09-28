@@ -5,6 +5,7 @@ import numpy as np
 import scipy.interpolate
 
 from .asarray import distance, hash, length, reorient, resample, smooth
+import streamlines.io
 
 
 class Streamline(object):
