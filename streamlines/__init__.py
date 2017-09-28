@@ -78,6 +78,10 @@ class Streamline(object):
     def resample(self, nb_points):
         self._points = resample(self._points, nb_points)
 
+    def reverse(sefl):
+        """Reverses the order of the points of the streamline"""
+        self._points = self._points[::-1]
+
     def smooth(self, knot_distance=10):
         """Smooths a streamline in place"""
         self._points = smooth(self._points, knot_distance)
@@ -135,6 +139,11 @@ class Streamlines(object):
 
         for streamline in self:
             streamline.reorient(template)
+
+    def reverse(self):
+        """Reverses the order of points of the streamlines"""
+        for streamline in self:
+            streamline.reverse()
 
     def smooth(self, knot_distance=10):
         """Smooth streamlines in place"""
