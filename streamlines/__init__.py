@@ -75,7 +75,7 @@ class Streamline(object):
         return self
 
     def resample(self, nb_points):
-        return Streamline(resample(self._points, nb_points))
+        self._points = resample(self._points, nb_points)
 
     def smooth(self, knot_distance=10):
         """Smooths a streamline in place"""
