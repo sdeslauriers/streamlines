@@ -78,7 +78,7 @@ class Streamline(object):
     def resample(self, nb_points):
         self._points = resample(self._points, nb_points)
 
-    def reverse(sefl):
+    def reverse(self):
         """Reverses the order of the points of the streamline"""
         self._points = self._points[::-1]
 
