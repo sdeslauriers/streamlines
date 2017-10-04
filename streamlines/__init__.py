@@ -12,6 +12,40 @@ class Streamline(object):
     """A diffusion MRI streamline"""
 
     def __init__(self, points=None):
+        """Diffusion MRI streamline
+
+        An instance of the Streamline class represents a single diffusion MRI
+        streamline. A streamline is formed by a sequence of points in 3D
+        space (e.g. a (N, 3) numpy array).
+
+
+        Args:
+            points (optional): The points of the streamlines. Any structure
+                which can be converted to a numpy array of floats with a shape
+                of (N, 3) is accepted. If not supplied, an empty streamline (a
+                streamline with 0 points) is returned.
+
+        Examples:
+            >>> import numpy as np
+            >>> import streamlines as sl
+
+            >>> empty_streamline = sl.Streamline()
+            >>> empty_streamline.length
+            0.0
+
+            >>> streamline = sl.Streamline([[0, 0, 0], [100, 0, 0]])
+            >>> streamline.length
+            100.0
+
+            >>> other_streamline = sl.Streamline(np.random.randn(100, 3))
+
+        Raises:
+            TypeError: If the ``points`` cannot be converted to a numpy array
+                of floats.
+            ValueError: If the numpy array resulting from ``points`` does not
+                have a shape of (N, 3).
+
+        """
 
         if points is None:
             points = np.empty((0, 3))
@@ -24,7 +58,7 @@ class Streamline(object):
 
         if points.ndim != 2:
             raise ValueError(
-                'points must be a two dimensionnal array, not {} dimensionnal.'
+                'points must be a two dimensional array, not {} dimensional.'
                 .format(points.ndim))
 
         if points.shape[1] != 3:
