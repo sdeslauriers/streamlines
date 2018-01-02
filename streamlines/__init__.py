@@ -5,6 +5,7 @@ import numpy as np
 import scipy.interpolate
 
 from .asarray import distance, hash, length, reorient, resample, smooth
+from .asarray import transform
 import streamlines.io
 
 
@@ -121,6 +122,11 @@ class Streamline(object):
         self._points = smooth(self._points, knot_distance)
         return self
 
+    def transform(self, affine):
+        """Applies an affine transformation to a streamline"""
+        self._points = transform(self._points, affine)
+        return self
+
 
 class Streamlines(object):
     """A sequence of dMRI streamlines"""
@@ -186,3 +192,8 @@ class Streamlines(object):
             streamline.smooth(knot_distance)
 
         return self
+
+    def transform(self, affine):
+        """Applies an affine transform to the streamlines"""
+        for streamline in self:
+            streamline.transform(affine)

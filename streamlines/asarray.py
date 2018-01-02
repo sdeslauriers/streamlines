@@ -129,3 +129,9 @@ def smooth(array, knot_distance=10):
     bspline = scipy.interpolate.make_lsq_spline(x, array, knots, degree)
 
     return bspline(x)
+
+def transform(array, affine):
+    """Applies an affine transform to a streamline"""
+
+    padded = np.hstack((array, np.ones((len(array), 1))))
+    return np.dot(padded, affine.T)[:, 0:3]
