@@ -12,19 +12,25 @@ import streamlines.io
 class Streamline(object):
     """A diffusion MRI streamline"""
 
-    def __init__(self, points=None):
+    def __init__(self, points=None, data=None):
         """Diffusion MRI streamline
 
         An instance of the Streamline class represents a single diffusion MRI
         streamline. A streamline is formed by a sequence of points in 3D
         space (e.g. a (N, 3) numpy array).
 
-
         Args:
             points (optional): The points of the streamlines. Any structure
                 which can be converted to a numpy array of floats with a shape
                 of (N, 3) is accepted. If not supplied, an empty streamline (a
                 streamline with 0 points) is returned.
+
+            data (optional): The metadata associated with the streamline.
+                Should be a dict whose values are arrays with a shape of (N, M)
+                or (N,) where M is the number of points of the streamline. For
+                (N, M), the data is associated with every point of the
+                streamline whereas for (N,) the data is associated with the
+                streamline itself.
 
         Examples:
             >>> import numpy as np
@@ -67,6 +73,10 @@ class Streamline(object):
                 'points must have a shape of (N, 3), not {}.'
                 .format(points.shape))
 
+        if data is None:
+            data = {}
+
+        self._data = data
         self._points = points
 
     def __contains__(self, point):
@@ -93,6 +103,10 @@ class Streamline(object):
 
     def __str__(self):
         return 'streamline: {} points'.format(len(self))
+
+    @property
+    def data(self):
+        return self._data
 
     @property
     def points(self):
@@ -129,11 +143,25 @@ class Streamline(object):
 
 
 class Streamlines(object):
-    """A sequence of dMRI streamlines"""
+    """A sequence of diffusion MRI streamlines"""
 
     def __init__(self, iterable=None, affine=np.eye(4)):
+        """Sequence of diffusion MRI streamlines
+
+           An instance of the Streamlines class represents a group of diffusion
+           MRI streamlines.
+
+           Args:
+                iterable (optional): An iterable that contains the individual
+                    streamlines. Each item in the iterable must be convertible
+                    to a Streamline instance, i.e. it must be convertible to a
+                    (N, 3) array of float. See the Streamline class for more
+                    details.
+
+        """
 
         self.affine = affine
+
         self._items = []
         if iterable is not None:
             self._items = [Streamline(i) for i in iterable]
@@ -164,6 +192,10 @@ class Streamlines(object):
     def lengths(self):
         """Returns the length of all streamlines"""
         return [s.length for s in self._items]
+
+    def append(self, streamline):
+        """Append a streamline to the sequence"""
+        self._items.append(streamline)
 
     def filter(self, min_length=None):
 
