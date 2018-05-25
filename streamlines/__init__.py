@@ -174,6 +174,27 @@ class Streamlines(object):
         return streamline in self._items
 
     def __getitem__(self, key):
+        """Get a single streamline or a subset of streamlines"""
+
+        # For numpy arrays, we support only bool for now.
+        if isinstance(key, np.ndarray):
+
+            if key.dtype is np.dtype(bool):
+
+                if key.ndim != 1 or len(key) != len(self):
+                    raise ValueError('When using a numpy of bool to get '
+                                     'streamlines, the length of the array '
+                                     'must math the number of streamlines '
+                                     '({} != {}).'.format(len(key), len(self)))
+
+                streamlines = [s for keep, s in zip(key, self) if keep]
+                return Streamlines(streamlines, self.affine)
+
+            else:
+                raise TypeError('Only numpy arrays of bool can be '
+                                'used as indices to Streamlines, not arrays '
+                                'of {}.'.format(key.dtype))
+
         return self._items[key]
 
     def __iter__(self):
