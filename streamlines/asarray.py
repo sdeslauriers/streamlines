@@ -79,7 +79,7 @@ def resample(streamline, nb_points):
     if len(streamline) == 2:
         method = 'slinear'
     elif len(streamline) == 3:
-        mehod = 'quadratic'
+        method = 'quadratic'
     else:
         method = 'cubic'
     
