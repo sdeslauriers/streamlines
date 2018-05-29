@@ -233,6 +233,11 @@ class Streamlines(object):
         for streamline in self:
             streamline.reorient(template)
 
+    def resample(self, nb_points=20):
+        """Resamples all the streamlines to the sample number of points"""
+        for streamline in self:
+            streamline.resample(nb_points)
+
     def reverse(self):
         """Reverses the order of points of the streamlines"""
         for streamline in self:
