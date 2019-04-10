@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
 import argparse
+import pkgutil
 
 import streamlines.cli
+import streamlines.cli.commands
 
 
 DESCRIPTION = """\
@@ -14,6 +16,16 @@ def parse_arguments():
 
     parser = argparse.ArgumentParser(description=DESCRIPTION)
     subparsers = parser.add_subparsers()
+    subparsers.required = True
+    subparsers.dest = 'subcommand'
+
+    # Load all the sub commands from the streamlines.cli.commands package
+    # dynamically.
+    package = streamlines.cli.commands
+    prefix = package.__name__ + '.'
+    for _, name, _ in pkgutil.iter_modules(package.__path__, prefix):
+        module = __import__(name, fromlist=['nothing'])
+        module.add_parser(subparsers)
 
     # The filter subparser.
     filter_subparser = subparsers.add_parser(
@@ -23,7 +35,7 @@ def parse_arguments():
                     '50mm using --min-length 50.',
         help='Filters streamlines based on their features.')
     filter_subparser.add_argument(
-        'input', metavar='input_file', type=str, 
+        'input', metavar='input_file', type=str,
         help='STR The file that contains the streamlines to filter. Can be of '
              'any file format supported by nibabel.')
     filter_subparser.add_argument(
@@ -44,22 +56,6 @@ def parse_arguments():
         help='STR The file that contains the streamlines. Can be of '
              'any file format supported by nibabel.')
     info_subparser.set_defaults(func=streamlines.cli.info)
-
-    # The merge subparser.
-    merge_subparser = subparsers.add_parser(
-        'merge',
-        description='Merges several streamline files into one. The merging '
-                    'operation does not verify if duplicate streamlines exist.',
-        help='Merges several streamline files into one.')
-    merge_subparser.add_argument(
-        'inputs', metavar='input_files', nargs='+',
-        help='STR STR ... The files to be merged. Can be of any file format '
-             'supported by nibabel.')
-    merge_subparser.add_argument(
-        'output', metavar='output_file', type=str,
-        help='STR The file where the merged streamlines will be saved. Can '
-             'be of any file format supported by nibabel.')
-    merge_subparser.set_defaults(func=streamlines.cli.merge)
 
     # The reorient subparser.
     reorient_subparser = subparsers.add_parser(
@@ -120,9 +116,9 @@ def parse_arguments():
 def main():
 
     args = parse_arguments()
-    parameters = {key: value for key, value in vars(args).items() if key != 'func'}
+    parameters = {k: v for k, v in vars(args).items() if k != 'func'}
     args.func(**parameters)
 
 
 if __name__ == '__main__':
-  main()
+    main()

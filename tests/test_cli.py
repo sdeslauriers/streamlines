@@ -5,7 +5,8 @@ import unittest
 import numpy as np
 
 from streamlines import Streamlines
-from streamlines.cli import filter, info, merge, reorient
+from streamlines.cli import filter, info, reorient
+from streamlines.cli.commands.merge import merge
 from streamlines.io import load, save
 
 
@@ -57,8 +58,8 @@ class TestCLI(unittest.TestCase):
         streamlines = Streamlines(points_list)
         filename = os.path.join(cls.test_dir.name, 'bundle-flipped.trk')
         save(streamlines, filename)
-    
-    @classmethod 
+
+    @classmethod
     def tearDownClass(cls):
         """Removes the streamlines file used to test the CLI"""
 
@@ -66,7 +67,7 @@ class TestCLI(unittest.TestCase):
 
     def test_filter(self):
         """Test the filter command of the CLI"""
-    
+
         # Filter the short streamlines. The result should be an empty tractogram.
         output = os.path.join(self.test_dir.name, 'test-filter-1.trk')
         filter(
