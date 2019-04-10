@@ -15,7 +15,7 @@ setup(
     description='A Python package to manipulate diffusion MRI streamlines',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    install_requires=['nibabel', 'numpy', 'scipy'],
+    install_requires=['nibabel', 'numpy', 'scipy', 'nicoord'],
     classifiers=(
         'Programming Language :: Python :: 3',
         'Operating System :: OS Independent',

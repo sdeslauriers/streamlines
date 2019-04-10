@@ -1,12 +1,21 @@
-import builtins
-import collections
+from typing import Iterable
+from typing import Optional
 
 import numpy as np
-import scipy.interpolate
+from nicoord import AffineTransform
+from nicoord import AffineTransformable
+from nicoord import CoordinateSystem
+from nicoord import CoordinateSystemSpace
+from nicoord import CoordinateSystemAxes
 
 from .asarray import distance, hash, length, reorient, resample, smooth
 from .asarray import transform
 import streamlines.io
+
+
+# The default coordinate system for streamlines is native RAS.
+_ras_mm = CoordinateSystem(
+    CoordinateSystemSpace.NATIVE, CoordinateSystemAxes.RAS)
 
 
 class Streamline(object):
@@ -136,16 +145,15 @@ class Streamline(object):
         self._points = smooth(self._points, knot_distance)
         return self
 
-    def transform(self, affine):
-        """Applies an affine transformation to a streamline"""
-        self._points = transform(self._points, affine)
-        return self
 
-
-class Streamlines(object):
+class Streamlines(AffineTransformable):
     """A sequence of diffusion MRI streamlines"""
 
-    def __init__(self, iterable=None, affine=np.eye(4)):
+    def __init__(
+            self,
+            iterable: Optional[Iterable] = None,
+            coordinate_system: Optional[CoordinateSystem] = None,
+            transforms: Optional[Iterable[AffineTransform]] = None):
         """Sequence of diffusion MRI streamlines
 
            An instance of the Streamlines class represents a group of diffusion
@@ -157,16 +165,35 @@ class Streamlines(object):
                     to a Streamline instance, i.e. it must be convertible to a
                     (N, 3) array of float. See the Streamline class for more
                     details.
+                coordinate_system: The coordinate system of the streamlines.
+                    The default is native (world) RAS.
+                transforms: An iterable of affine transformations to other
+                    coordinate systems.
 
         """
 
-        self.affine = affine
+        # The AffineTransformable super class deals with all the coordinate
+        # system and affine transform information. We only make sure the
+        # default is native RAS.
+        if coordinate_system is None:
+            coordinate_system = _ras_mm
+        super().__init__(coordinate_system, transforms)
 
+        # Convert each item of the iterable to a Streamline object.
         self._items = []
         if iterable is not None:
             self._items = [Streamline(i) for i in iterable]
 
-    def __iadd__(self, other):
+    @property
+    def _transformable_points(self) -> Iterable[np.ndarray]:
+        return [s.points for s in self]
+
+    @_transformable_points.setter
+    def _transformable_points(self, points: Iterable[np.ndarray]):
+        for streamline, new_points in zip(self, points):
+            streamline._points = new_points
+
+    def __iadd__(self, other: 'Streamlines'):
         self._items += other._items
         return self
 
@@ -184,11 +211,14 @@ class Streamlines(object):
                 if key.ndim != 1 or len(key) != len(self):
                     raise ValueError('When using a numpy of bool to get '
                                      'streamlines, the length of the array '
-                                     'must math the number of streamlines '
+                                     'must match the number of streamlines '
                                      '({} != {}).'.format(len(key), len(self)))
 
-                streamlines = [s for keep, s in zip(key, self) if keep]
-                return Streamlines(streamlines, self.affine)
+                sub_streamlines = [s for keep, s in zip(key, self) if keep]
+                new_streamlines = Streamlines(
+                    sub_streamlines, self.coordinate_system, self.transforms)
+
+                return new_streamlines
 
             else:
                 raise TypeError('Only numpy arrays of bool can be '
@@ -250,8 +280,3 @@ class Streamlines(object):
             streamline.smooth(knot_distance)
 
         return self
-
-    def transform(self, affine):
-        """Applies an affine transform to the streamlines"""
-        for streamline in self:
-            streamline.transform(affine)

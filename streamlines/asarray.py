@@ -1,7 +1,7 @@
 import builtins
 
 import numpy as np
-import scipy
+import scipy.interpolate
 
 
 MIN_NB_POINTS = 10
@@ -82,13 +82,13 @@ def resample(streamline, nb_points):
         method = 'quadratic'
     else:
         method = 'cubic'
-    
+
     # The x, y, and z coordinates are interpolated independently.
     t = np.linspace(0, 1, len(streamline))
 
-    fx = scipy.interpolate.interp1d(t, streamline[:, 0], method) 
-    fy = scipy.interpolate.interp1d(t, streamline[:, 1], method) 
-    fz = scipy.interpolate.interp1d(t, streamline[:, 2], method) 
+    fx = scipy.interpolate.interp1d(t, streamline[:, 0], method)
+    fy = scipy.interpolate.interp1d(t, streamline[:, 1], method)
+    fz = scipy.interpolate.interp1d(t, streamline[:, 2], method)
 
     nt = np.linspace(0, 1, nb_points)
     new_streamline = np.array([fx(nt), fy(nt), fz(nt)]).T

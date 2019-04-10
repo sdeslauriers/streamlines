@@ -2,7 +2,7 @@ from functools import reduce
 import operator
 
 import numpy as np
-import vtk
+# import vtk
 
 from streamlines.io import load, save
 
@@ -32,7 +32,7 @@ def merge(inputs, output):
 
     # Load all the input streamlines and merge them.
     streamlines_list = [load(i) for i in inputs]
-    streamlines = reduce(operator.iadd, streamlines_list)    
+    streamlines = reduce(operator.iadd, streamlines_list)
 
     # Save the streamlines to the output file.
     save(streamlines, output)
