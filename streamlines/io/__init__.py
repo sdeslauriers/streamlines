@@ -5,6 +5,8 @@ from nicoord import AffineTransform
 from nicoord import CoordinateSystem
 from nicoord import CoordinateSystemSpace
 from nicoord import CoordinateSystemAxes
+from nicoord import VoxelSpace
+from nicoord import coord
 from nicoord import inverse
 
 import streamlines as sl
@@ -31,14 +33,16 @@ def load(filename: str):
 
     # Load the input streamlines.
     tractogram_file = nib.streamlines.load(filename)
-    affine_to_rasmm = tractogram_file.header['voxel_to_rasmm']
+    header = tractogram_file.header
+    affine_to_rasmm = header['voxel_to_rasmm']
+    voxel_sizes = header['voxel_sizes']
+    shape = header['dimensions']
 
     # If there is a transform to RAS, invert it to get the transform to
     # voxel space.
     if not np.allclose(affine_to_rasmm, np.eye(4)):
         affine_to_voxel = np.linalg.inv(affine_to_rasmm)
-        target = CoordinateSystem(
-            CoordinateSystemSpace.VOXEL, CoordinateSystemAxes.RAS)
+        target = coord('voxel', 'ras', voxel_sizes, shape)
         transforms = [AffineTransform(_ras_mm, target, affine_to_voxel)]
 
     else:
@@ -55,8 +59,7 @@ def load(filename: str):
     return streamlines
 
 
-def save(streamlines, filename, reference_volume_shape=(1, 1, 1),
-         voxel_size=(1, 1, 1)):
+def save(streamlines, filename):
     """Saves streamlines to a trk file
 
     Saves the streamlines and their metadata to a trk file.
@@ -65,11 +68,6 @@ def save(streamlines, filename, reference_volume_shape=(1, 1, 1),
         streamlines (streamlines.Streamlines): The streamlines to save.
         filename (str): The filename of the output file. If the file
             exists, it will be overwritten.
-        reference_volume_shape (sequence, optional): A sequence with a
-            shape of (3,) which contains the shape of the reference volume
-            of the streamlines.
-        voxel_size (sequence, optional): A sequence with a shape of (3,)
-            which contains the voxel size of the reference volume.
 
     Examples:
         >>> import numpy as np
@@ -109,8 +107,9 @@ def save(streamlines, filename, reference_volume_shape=(1, 1, 1),
 
         # Note that we don't change the coordinate system. Nibabel does it on
         # save.
-        affine = valid_transforms[0].affine
-        affine_to_rasmm = affine
+        transform = valid_transforms[0]
+        coordinate_system = transform.target
+        affine_to_rasmm = affine = transform.affine
 
     else:
 
@@ -119,12 +118,27 @@ def save(streamlines, filename, reference_volume_shape=(1, 1, 1),
 
         # If we are in RAS, we can still find the transform to native RAS as
         # the inverse of the inverse. It is ok if there is none.
-        valid_transforms = [t for t in transforms if t.target == _ras_mm]
+        target = coord('voxel', 'ras')
+        valid_transforms = [t for t in transforms if t.target == target]
 
         if len(valid_transforms) == 0:
             affine = np.eye(4)
+            coordinate_system = coord('voxel', 'ras')
         else:
-            affine = inverse(valid_transforms[0]).affine
+            transform = inverse(valid_transforms[0])
+            coordinate_system = transform.target
+            affine = transform.affine
+
+    # Get the reference image information from the coordinate system if it is
+    # available.
+    if isinstance(coordinate_system, VoxelSpace):
+        shape = coordinate_system.shape
+        voxel_sizes = coordinate_system.voxel_sizes
+    else:
+
+        # Use default values if voxel space data is not available.
+        shape = (1, 1, 1)
+        voxel_sizes = (1, 1, 1)
 
     new_tractogram = nib.streamlines.Tractogram(
         [s.points for s in streamlines],
@@ -132,8 +146,8 @@ def save(streamlines, filename, reference_volume_shape=(1, 1, 1),
         data_per_point=data_per_point,
         data_per_streamline=data_per_streamline)
 
-    hdr_dict = {'dimensions': reference_volume_shape,
-                'voxel_sizes': voxel_size,
+    hdr_dict = {'dimensions': shape,
+                'voxel_sizes': voxel_sizes,
                 'voxel_to_rasmm': affine,
                 'voxel_order': "".join(nib.aff2axcodes(affine))}
     trk_file = nib.streamlines.TrkFile(new_tractogram, hdr_dict)
