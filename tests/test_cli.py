@@ -5,7 +5,8 @@ import unittest
 import numpy as np
 
 from streamlines import Streamlines
-from streamlines.cli import filter, info, reorient
+from streamlines.cli import filter, reorient
+from streamlines.cli.commands.info import info
 from streamlines.cli.commands.merge import merge
 from streamlines.io import load, save
 

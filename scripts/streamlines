@@ -47,16 +47,6 @@ def parse_arguments():
         help='The minimum length of streamlines included in the output.')
     filter_subparser.set_defaults(func=streamlines.cli.filter)
 
-    # The information subparser.
-    info_subparser = subparsers.add_parser(
-        'info',
-        description='Prints information about streamlines in a file.')
-    info_subparser.add_argument(
-        'input', metavar='input_file', type=str,
-        help='STR The file that contains the streamlines. Can be of '
-             'any file format supported by nibabel.')
-    info_subparser.set_defaults(func=streamlines.cli.info)
-
     # The reorient subparser.
     reorient_subparser = subparsers.add_parser(
         'reorient',
@@ -95,20 +85,6 @@ def parse_arguments():
         help='The distance between knots. Larger distance yield smoother '
              'streamlines.')
     smooth_subparser.set_defaults(func=streamlines.cli.smooth)
-
-    # The view subparser.
-    view_subparser = subparsers.add_parser(
-        'view',
-        description='Visualize streamlines using VTK. This is meant to be a '
-                    'quality control tool and not a full featured '
-                    'visualization.',
-        help='View streamlines in interactive window.',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    view_subparser.add_argument(
-        'filename', metavar='input_file', type=str,
-        help='STR The file that contains the streamlines to view. Can be of '
-             'any file format supported by nibabel.')
-    view_subparser.set_defaults(func=streamlines.cli.view)
 
     return parser.parse_args()
 
