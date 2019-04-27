@@ -27,65 +27,6 @@ def parse_arguments():
         module = __import__(name, fromlist=['nothing'])
         module.add_parser(subparsers)
 
-    # The filter subparser.
-    filter_subparser = subparsers.add_parser(
-        'filter',
-        description='Removes streamlines from a file based on their features. '
-                    'For example, remove all streamlines with a length below '
-                    '50mm using --min-length 50.',
-        help='Filters streamlines based on their features.')
-    filter_subparser.add_argument(
-        'input', metavar='input_file', type=str,
-        help='STR The file that contains the streamlines to filter. Can be of '
-             'any file format supported by nibabel.')
-    filter_subparser.add_argument(
-        'output', metavar='output_file', type=str,
-        help='STR The file where the filtered streamlines will be saved. Can '
-             'be of any file format supported by nibabel.')
-    filter_subparser.add_argument(
-        '--min-length', metavar='FLOAT', type=float,
-        help='The minimum length of streamlines included in the output.')
-    filter_subparser.set_defaults(func=streamlines.cli.filter)
-
-    # The reorient subparser.
-    reorient_subparser = subparsers.add_parser(
-        'reorient',
-        description='Reorients the streamlines so they all have the same '
-                    'orientation (similar start/finish ROI). Reorient only '
-                    'makes sense if the file contains a single bundle.',
-        help='Reorients streamlines of a bundle.',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    reorient_subparser.add_argument(
-        'input', metavar='input_file', type=str,
-        help='STR The file that contains the streamlines to reorient. Can be '
-             'of any file format supported by nibabel.')
-    reorient_subparser.add_argument(
-        'output', metavar='output_file', type=str,
-        help='STR The file where the reoriented streamlines will be saved. '
-             'Can be of any file format supported by nibabel.')
-
-    # The smooth subparser.
-    smooth_subparser = subparsers.add_parser(
-        'smooth',
-        description='Smooths streamlines using a least square b-spline. The '
-                    'distance between knots controls the smoothness of the '
-                    'output streamline with larger distances being smoother.',
-        help='Smooths streamlines using a least square b-spline.',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    smooth_subparser.add_argument(
-        'input', metavar='input_file', type=str,
-        help='STR The file that contains the streamlines to smooth. Can be of '
-             'any file format supported by nibabel.')
-    smooth_subparser.add_argument(
-        'output', metavar='output_file', type=str,
-        help='STR The file where the smoothed streamlines will be saved. Can '
-             'be of any file format supported by nibabel.')
-    smooth_subparser.add_argument(
-        '--knot-distance', metavar='FLOAT', type=float, default=10.0,
-        help='The distance between knots. Larger distance yield smoother '
-             'streamlines.')
-    smooth_subparser.set_defaults(func=streamlines.cli.smooth)
-
     return parser.parse_args()
 
 

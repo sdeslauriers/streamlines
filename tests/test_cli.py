@@ -5,7 +5,8 @@ import unittest
 import numpy as np
 
 from streamlines import Streamlines
-from streamlines.cli import filter, reorient
+from streamlines.cli.commands.reorient import reorient
+from streamlines.cli.commands.filter import filter
 from streamlines.cli.commands.info import info
 from streamlines.cli.commands.merge import merge
 from streamlines.io import load, save
@@ -69,7 +70,8 @@ class TestCLI(unittest.TestCase):
     def test_filter(self):
         """Test the filter command of the CLI"""
 
-        # Filter the short streamlines. The result should be an empty tractogram.
+        # Filter the short streamlines. The result should be an empty
+        # tractogram.
         output = os.path.join(self.test_dir.name, 'test-filter-1.trk')
         filter(
             os.path.join(self.test_dir.name, 'short.trk'),
