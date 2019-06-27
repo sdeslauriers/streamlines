@@ -6,7 +6,7 @@ with open('README.md', 'r') as f:
 setup(
     name='streamlines',
     version='0.0.0',
-    packages=['streamlines', 'streamlines.io'],
+    packages=['streamlines', 'streamlines.io', 'streamlines.cli'],
     scripts=['scripts/streamlines'],
     url='https://github.com/sdeslauriers/streamlines',
     license='GPL-3.0',
