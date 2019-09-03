@@ -32,6 +32,58 @@ class TestIO(unittest.TestCase):
         for streamline, recovered in zip(streamlines, recovered_streamlines):
             np.testing.assert_array_almost_equal(streamline, recovered.points)
 
+    def test_simple_save_and_load_tck(self):
+        """Test the saving and loading for simple streamline data in tck"""
+
+        streamlines = np.random.randint(0, 100, size=(9, 10, 3))
+        streamlines[streamlines < 0] = 0
+
+        output = NamedTemporaryFile(mode='w', delete=True, suffix='.tck').name
+
+        # Saving and reloading should give the same points because the
+        # streamlines are already in RAS by default.
+        streamlines_without_affine = sl.Streamlines(streamlines)
+        sl.io.save(streamlines_without_affine, output)
+        recovered_streamlines = sl.io.load(output)
+
+        for streamline, recovered in zip(streamlines, recovered_streamlines):
+            np.testing.assert_array_almost_equal(streamline, recovered.points)
+
+    def test_save_with_data(self):
+        """Test saving a streamline with attached data"""
+
+        def random_streamline():
+            nb_points = np.random.randint(1, 100)
+            points = np.random.randint(0, 100, size=(nb_points, 3))
+            point_data = np.random.randn(1, nb_points)
+            streamline_data = np.random.randn(5)
+            data = {
+                'point-data': point_data,
+                'streamline-data': streamline_data
+            }
+            return sl.Streamline(points, data)
+
+        streamlines = sl.Streamlines()
+        for _ in range(3):
+            streamlines += random_streamline()
+
+        output = NamedTemporaryFile(mode='w', delete=True, suffix='.trk').name
+        sl.io.save(streamlines, output)
+        recovered_streamlines = sl.io.load(output)
+
+        for s, r in zip(streamlines, recovered_streamlines):
+            np.testing.assert_array_almost_equal(s.points, r.points)
+            np.testing.assert_array_almost_equal(
+                s.data['point-data'], r.data['point-data'])
+
+        output = NamedTemporaryFile(mode='w', delete=True, suffix='.tck').name
+        sl.io.save(streamlines, output)
+        recovered_streamlines = sl.io.load(output)
+
+        # The data is missing because it cannot be saved in .tck.
+        for s, r in zip(streamlines, recovered_streamlines):
+            np.testing.assert_array_almost_equal(s.points, r.points)
+
     def test_with_affine(self):
         """Test saving and loading with an affine transformation"""
 

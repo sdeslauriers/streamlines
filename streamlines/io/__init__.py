@@ -1,3 +1,5 @@
+from os.path import splitext
+
 import nibabel as nib
 import numpy as np
 
@@ -20,7 +22,7 @@ _ras_mm = CoordinateSystem(
 def load(filename: str):
     """Loads the streamlines contained in a file
 
-    Loads the streamlines contained in a .trk file. The streamlines are
+    Loads the streamlines contained in a file. The streamlines are
     always loaded in a native RAS coordinate system. If the voxel_to_rasmm
     affine transform is present in the header, it is also loaded with
     the streamlines. This allows the transformation to voxel space using the
@@ -150,5 +152,14 @@ def save(streamlines, filename):
                 'voxel_sizes': voxel_sizes,
                 'voxel_to_rasmm': affine,
                 'voxel_order': "".join(nib.aff2axcodes(affine))}
-    trk_file = nib.streamlines.TrkFile(new_tractogram, hdr_dict)
-    trk_file.save(filename)
+
+    # Choose the file type from the extension.
+    _, extension = splitext(filename)
+    if extension == '.trk':
+        tractogram_file = nib.streamlines.TrkFile
+    elif extension == '.tck':
+        tractogram_file = nib.streamlines.TckFile
+    else:
+        raise ValueError(f'Unknown streamlines file format {extension}.')
+    tractogram_file = tractogram_file(new_tractogram, hdr_dict)
+    tractogram_file.save(filename)

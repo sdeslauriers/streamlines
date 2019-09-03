@@ -193,8 +193,16 @@ class Streamlines(AffineTransformable):
         for streamline, new_points in zip(self, points):
             streamline._points = new_points
 
-    def __iadd__(self, other: 'Streamlines'):
-        self._items += other._items
+    def __iadd__(self, other):
+        if isinstance(other, Streamlines):
+            self._items += other._items
+        elif isinstance(other, Streamline):
+            self._items.append(other)
+        else:
+            raise TypeError(
+                f'A value of type {type(other)} cannot be concatenated with '
+                f'streamlines.')
+
         return self
 
     def __contains__(self, streamline):
