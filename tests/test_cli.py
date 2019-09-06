@@ -5,11 +5,13 @@ import unittest
 import numpy as np
 
 from streamlines import Streamlines
+from streamlines.cli.commands.convert import convert
 from streamlines.cli.commands.reorient import reorient
 from streamlines.cli.commands.filter import filter
 from streamlines.cli.commands.info import info
 from streamlines.cli.commands.merge import merge
-from streamlines.io import load, save
+from streamlines.io import load
+from streamlines.io import save
 
 
 class TestCLI(unittest.TestCase):
@@ -67,6 +69,16 @@ class TestCLI(unittest.TestCase):
 
         cls.test_dir.cleanup()
 
+    def test_convert(self):
+        """Test the convert command of the CLI"""
+
+        # Simply try to convert the file. Nothing should happen.
+        input_filename = os.path.join(self.test_dir.name, 'short.trk')
+        output_filename = os.path.join(self.test_dir.name, 'short.tck')
+        convert(input_filename, output_filename)
+        streamlines = load(output_filename)
+        self.assertEqual(len(streamlines), 3)
+
     def test_filter(self):
         """Test the filter command of the CLI"""
 
@@ -98,7 +110,7 @@ class TestCLI(unittest.TestCase):
         streamlines = load(output)
         self.assertEqual(len(streamlines), 4)
 
-        # Merging the shord and empty files should yield 3 streamlines.
+        # Merging the short and empty files should yield 3 streamlines.
         inputs = [os.path.join(self.test_dir.name, i)
                   for i in ['short.trk', 'empty.trk']]
         output = os.path.join(self.test_dir.name, 'test-merge-2.trk')

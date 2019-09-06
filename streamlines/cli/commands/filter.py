@@ -12,11 +12,11 @@ def add_parser(subparsers):
                     '50mm using --min-length 50.',
         help='Filters streamlines based on their features.')
     filter_subparser.add_argument(
-        'input', metavar='input_file', type=str,
+        'input_filename', metavar='input_file', type=str,
         help='STR The file that contains the streamlines to filter. Can be of '
              'any file format supported by nibabel.')
     filter_subparser.add_argument(
-        'output', metavar='output_file', type=str,
+        'output_filename', metavar='output_file', type=str,
         help='STR The file where the filtered streamlines will be saved. Can '
              'be of any file format supported by nibabel.')
     filter_subparser.add_argument(

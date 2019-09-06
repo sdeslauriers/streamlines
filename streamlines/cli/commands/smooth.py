@@ -15,11 +15,11 @@ def add_parser(subparsers):
         help='Smooths streamlines using a least square b-spline.',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     smooth_subparser.add_argument(
-        'input', metavar='input_file', type=str,
+        'input_filename', metavar='input_file', type=str,
         help='STR The file that contains the streamlines to smooth. Can be of '
              'any file format supported by nibabel.')
     smooth_subparser.add_argument(
-        'output', metavar='output_file', type=str,
+        'output_filename', metavar='output_file', type=str,
         help='STR The file where the smoothed streamlines will be saved. Can '
              'be of any file format supported by nibabel.')
     smooth_subparser.add_argument(

@@ -10,24 +10,24 @@ def add_parser(subparsers):
         'info',
         description='Prints information about streamlines in a file.')
     info_subparser.add_argument(
-        'input', metavar='input_file', type=str,
+        'input_filename', metavar='input_file', type=str,
         help='STR The file that contains the streamlines. Can be of '
              'any file format supported by nibabel.')
     info_subparser.set_defaults(func=info)
 
 
-def info(streamlines_filename):
+def info(input_filename):
     """Print information about a streamlines file
 
     Prints the number of streamlines in the file and the mean length of the
     streamlines.
 
     Args:
-        streamlines_filename: The file whose info is printed.
+        input_filename: The file whose info is printed.
     """
 
     # Load the input streamlines using the requested parameters.
-    streamlines = load(streamlines_filename)
+    streamlines = load(input_filename)
 
     # Print info about the streamlines.
     out = ''

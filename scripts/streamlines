@@ -33,7 +33,8 @@ def parse_arguments():
 def main():
 
     args = parse_arguments()
-    parameters = {k: v for k, v in vars(args).items() if k != 'func'}
+    to_ignore = ['func', 'subcommand']
+    parameters = {k: v for k, v in vars(args).items() if k not in to_ignore}
     args.func(**parameters)
 
 
