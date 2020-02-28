@@ -1,4 +1,5 @@
 from os.path import splitext
+import warnings
 
 import nibabel as nib
 import numpy as np
@@ -36,9 +37,25 @@ def load(filename: str):
     # Load the input streamlines.
     tractogram_file = nib.streamlines.load(filename)
     header = tractogram_file.header
-    affine_to_rasmm = header['voxel_to_rasmm']
-    voxel_sizes = header['voxel_sizes']
-    shape = header['dimensions']
+
+    if 'voxel_to_rasmm' in header:
+        affine_to_rasmm = header['voxel_to_rasmm']
+    else:
+        affine_to_rasmm = np.eye(4)
+
+    if 'voxel_sizes' in header:
+        voxel_sizes = header['voxel_sizes']
+    else:
+        warnings.warn('The file {filename} does not contain voxel size '
+                      'information. Setting voxel size to 1.')
+        voxel_sizes = [1, 1, 1]
+
+    if 'dimensions' in header:
+        shape = header['dimensions']
+    else:
+        warnings.warn('The file {filename} does not contain image dimension '
+                      'information. Setting image dimensions to (1, 1, 1).')
+        shape = (1, 1, 1)
 
     # If there is a transform to RAS, invert it to get the transform to
     # voxel space.
